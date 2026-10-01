@@ -3,6 +3,7 @@ package com.banking.account_service.dto;
 import com.banking.account_service.entity.AccountStatus;
 import com.banking.account_service.entity.AccountType;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class AccountResponse {
     private String id;
 
@@ -27,11 +29,9 @@ public class AccountResponse {
 
     private AccountStatus status;
 
-    private BigDecimal balances;
+    private BigDecimal balance;
 
-    private BigDecimal dailyTractionalLimit;
+    private BigDecimal dailyTransactionLimit;
 
     private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
 }
