@@ -32,7 +32,7 @@ public class AccountService {
                 .phone(request.getPhone())
                 .accountType(request.getAccountType())
                 .status(AccountStatus.ACTIVE)
-                .balances(request.getInitialDeposit())
+                .balance(request.getInitialDeposit())
                 .accountNumber(generateAccountNumber())
                 .dailyTractionalLimit(request.getAccountType() == AccountType.SAVINGS ? new BigDecimal("100000") : new BigDecimal("500000"))
                 .build();
@@ -45,6 +45,49 @@ public class AccountService {
         Account account = accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
         return mapToResponse(account);
+    }
+
+    public BigDecimal getBalance(String accountNumber) {
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+        return account.getBalance();
+    }
+
+    public void blockAccount(String accountNumber) {
+        log.info("Blocking account: {}", accountNumber);
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+        account.setStatus(AccountStatus.BLOCKED);
+        accountRepository.save(account);
+        log.info("Account blocked: {}", accountNumber);
+    }
+
+    public void deductBalance(String accountNumber, BigDecimal amount) {
+        log.info("Deducting balance: {} from account: {}", amount, accountNumber);
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new RuntimeException("Account  not found"));
+
+        if(account.getStatus() != AccountStatus.ACTIVE) {
+            throw new RuntimeException("Account is not active " + accountNumber);
+        }
+
+        if(account.getBalance().compareTo(amount) < 0) {
+            throw new RuntimeException("Insufficient funds for account " + accountNumber);
+        }
+        account.setBalance(account.getBalance().subtract(amount));
+        accountRepository.save(account);
+
+        log.info("Balance updated. New Balance: {}", account.getBalance());
+    }
+
+    public void creditBalance(String accountNumber, BigDecimal amount){
+        log.info("Crediting {} to account: {}", amount, accountNumber);
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(()->new RuntimeException("Account not found"));
+        account.setBalance(account.getBalance().add(amount));
+        accountRepository.save(account);
+
+        log.info("Balance Credited. New Balance: {}", account.getBalance());
     }
 
     private String generateAccountNumber() {
@@ -65,7 +108,7 @@ public class AccountService {
                 .phone(account.getPhone())
                 .accountType(account.getAccountType())
                 .status(account.getStatus())
-                .balance(account.getBalances())
+                .balance(account.getBalance())
                 .dailyTransactionLimit(account.getDailyTractionalLimit())
                 .createdAt(account.getCreatedAt())
                 .build();

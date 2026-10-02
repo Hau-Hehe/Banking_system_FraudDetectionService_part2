@@ -43,7 +43,7 @@ public class Account {
     private AccountStatus status;
 
     @Column(nullable = false, precision = 15, scale = 2)
-    private BigDecimal balances;
+    private BigDecimal balance;
 
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal dailyTractionalLimit;
