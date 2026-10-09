@@ -2,4 +2,5 @@ spring:
   application:
     name: fraud-detection-service
 fraud:
-  max-transactions-per-minute:
+  max-transactions-per-minute: 5
+  suspicious-amount-multiplier: 5
